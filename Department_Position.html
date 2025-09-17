@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý phòng ban và vị trí - SafetyPro Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+        }
+
+        .tab-content {
+            padding: 2rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3498db;
+        }
+
+        .filter-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.1);
+            border: 2px solid rgba(108, 117, 125, 0.3);
+            color: #6c757d;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-item i {
+            color: #3498db;
+            width: 16px;
+        }
+
+        .employee-count {
+            background: rgba(46, 204, 113, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .count-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 0.25rem;
+        }
+
+        .count-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .hierarchy-view {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .tree-view {
+            font-family: monospace;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+
+        .tree-item {
+            margin-left: 1rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .tree-item:hover {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .tree-item.expandable::before {
+            content: '▶ ';
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .tree-item.expanded::before {
+            content: '▼ ';
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .tree-item.leaf::before {
+            content: '• ';
+            color: #95a5a6;
+        }
+
+        .tree-children {
+            margin-left: 2rem;
+            border-left: 2px dashed rgba(52, 152, 219, 0.3);
+            padding-left: 1rem;
+        }
+
+        .data-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background: rgba(52, 152, 219, 0.05);
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            color: #555;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            border: 2px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 2px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .level-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #666;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(23, 162, 184, 0.1);
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .department-hierarchy-path {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .projects-list {
+            margin-top: 1rem;
+        }
+
+        .project-item {
+            background: rgba(52, 152, 219, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-name {
+            font-weight: 500;
+        }
+
+        .project-status {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .card-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-sitemap"></i> Quản lý phòng ban và vị trí</h1>
+                <div class="breadcrumb">
+                    <a href="admin_dashboard.html">Dashboard</a> / Phòng ban và vị trí
+                </div>
+            </div>
+            <a href="admin_dashboard.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-value" id="totalDepartments">0</div>
+                <div class="stat-label">Phòng ban hoạt động</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="stat-value" id="totalPositions">0</div>
+                <div class="stat-label">Vị trí công việc</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value" id="totalEmployees">0</div>
+                <div class="stat-label">Nhân viên đang làm</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-value" id="totalProjects">0</div>
+                <div class="stat-label">Dự án đang thực hiện</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="switchTab('departments')">
+                    <i class="fas fa-building"></i> Phòng ban
+                </button>
+                <button class="tab-button" onclick="switchTab('positions')">
+                    <i class="fas fa-user-tie"></i> Vị trí công việc
+                </button>
+                <button class="tab-button" onclick="switchTab('hierarchy')">
+                    <i class="fas fa-sitemap"></i> Cơ cấu tổ chức
+                </button>
+                <button class="tab-button" onclick="switchTab('analytics')">
+                    <i class="fas fa-chart-bar"></i> Phân tích
+                </button>
+            </div>
+
+            <!-- Departments Tab -->
+            <div class="tab-content active" id="departments-tab">
+                <div class="controls">
+                    <div class="search-filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Tìm kiếm phòng ban..." id="departmentSearch">
+                        </div>
+                        
+                        <select class="filter-select" id="departmentStatusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="inactive">Không hoạt động</option>
+                        </select>
+                        
+                        <select class="filter-select" id="parentDepartmentFilter">
+                            <option value="">Tất cả cấp độ</option>
+                            <option value="root">Phòng ban gốc</option>
+                            <option value="sub">Phòng ban con</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="openModal('addDepartmentModal')">
+                        <i class="fas fa-plus"></i> Thêm phòng ban
+                    </button>
+                </div>
+
+                <div class="data-grid" id="departmentsGrid">
+                    <!-- Departments will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Positions Tab -->
+            <div class="tab-content" id="positions-tab">
+                <div class="controls">
+                    <div class="search-filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Tìm kiếm vị trí..." id="positionSearch">
+                        </div>
+                        
+                        <select class="filter-select" id="positionStatusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="inactive">Không hoạt động</option>
+                        </select>
+                        
+                        <select class="filter-select" id="levelFilter">
+                            <option value="">Tất cả cấp bậc</option>
+                            <option value="1">Cấp 1 (Nhân viên)</option>
+                            <option value="2">Cấp 2 (Chuyên viên)</option>
+                            <option value="3">Cấp 3 (Trưởng nhóm)</option>
+                            <option value="4">Cấp 4 (Phó phòng)</option>
+                            <option value="5">Cấp 5 (Trưởng phòng)</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="openModal('addPositionModal')">
+                        <i class="fas fa-plus"></i> Thêm vị trí
+                    </button>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên vị trí</th>
+                                <th>Cấp bậc</th>
+                                <th>Mô tả</th>
+                                <th>Số nhân viên</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTable">
+                            <!-- Positions will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hierarchy Tab -->
+            <div class="tab-content" id="hierarchy-tab">
+                <div class="hierarchy-view">
+                    <h3 style="margin-bottom: 1.5rem; color: #2c3e50;">
+                        <i class="fas fa-sitemap"></i> Cơ cấu tổ chức công ty
+                    </h3>
+                    <div id="organizationChart" class="tree-view">
+                        <!-- Organization chart will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-content" id="analytics-tab">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">
+                            <i class="fas fa-chart-pie"></i> Phân bố nhân viên theo phòng ban
+                        </h3>
+                        <div id="departmentEmployeeChart">
+                            <!-- Chart will be rendered here -->
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">
+                            <i class="fas fa-chart-bar"></i> Phân bố theo vị trí
+                        </h3>
+                        <div id="positionEmployeeChart">
+                            <!-- Chart will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hierarchy-view">
+                    <h3 style="margin-bottom: 1.5rem; color: #2c3e50;">
+                        <i class="fas fa-clipboard-list"></i> Báo cáo chi tiết
+                    </h3>
+                    <div id="detailedReport">
+                        <!-- Detailed report will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Department Modal -->
+    <div id="addDepartmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Thêm phòng ban mới</h2>
+                <span class="close-modal" onclick="closeModal('addDepartmentModal')">&times;</span>
+            </div>
+            
+            <form id="departmentForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Tên phòng ban *</label>
+                        <input type="text" class="form-input" id="departmentName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phòng ban cha</label>
+                        <select class="form-input" id="parentDepartment">
+                            <option value="">Không có (phòng ban gốc)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trưởng phòng</label>
+                        <select class="form-input" id="departmentManager">
+                            <option value="">Chưa chỉ định</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-input" id="departmentStatus">
+                            <option value="true">Đang hoạt động</option>
+                            <option value="false">Không hoạt động</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-input" id="departmentDescription" rows="4" placeholder="Mô tả về phòng ban..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addDepartmentModal')">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu phòng ban
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Position Modal -->
+    <div id="addPositionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Thêm vị trí mới</h2>
+                <span class="close-modal" onclick="closeModal('addPositionModal')">&times;</span>
+            </div>
+            
+            <form id="positionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Tên vị trí *</label>
+                        <input type="text" class="form-input" id="positionName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Cấp bậc *</label>
+                        <select class="form-input" id="positionLevel" required>
+                            <option value="">Chọn cấp bậc</option>
+                            <option value="1">Cấp 1 (Nhân viên)</option>
+                            <option value="2">Cấp 2 (Chuyên viên)</option>
+                            <option value="3">Cấp 3 (Trưởng nhóm)</option>
+                            <option value="4">Cấp 4 (Phó phòng)</option>
+                            <option value="5">Cấp 5 (Trưởng phòng)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-input" id="positionStatus">
+                            <option value="true">Đang hoạt động</option>
+                            <option value="false">Không hoạt động</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label class="form-label">Mô tả công việc</label>
+                        <textarea class="form-input" id="positionDescription" rows="4" placeholder="Mô tả về vị trí công việc..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addPositionModal')">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu vị trí
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employee Details Modal -->
+    <div id="employeeDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Danh sách nhân viên</h2>
+                <span class="close-modal" onclick="closeModal('employeeDetailsModal')">&times;</span>
+            </div>
+            
+            <div id="employeeDetailsContent">
+                <!-- Employee details will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced database-connected data structures
+        let departments = [
+            {
+                department_id: 1,
+                department_name: "Ban Giám đốc",
+                description: "Ban lãnh đạo cao nhất của công ty",
+                parent_department_id: null,
+                manager_id: 1,
+                is_active: true
+            },
+            {
+                department_id: 2,
+                department_name: "Phòng Nhân sự",
+                description: "Quản lý nhân sự, tuyển dụng và đào tạo",
+                parent_department_id: 1,
+                manager_id: 3,
+                is_active: true
+            },
+            {
+                department_id: 3,
+                department_name: "Phòng An toàn Lao động",
+                description: "Đảm bảo an toàn lao động và môi trường làm việc",
+                parent_department_id: 1,
+                manager_id: 5,
+                is_active: true
+            },
+            {
+                department_id: 4,
+                department_name: "Phòng Kỹ thuật",
+                description: "Quản lý kỹ thuật và công nghệ",
+                parent_department_id: 1,
+                manager_id: 8,
+                is_active: true
+            },
+            {
+                department_id: 5,
+                department_name: "Phòng Tài chính",
+                description: "Quản lý tài chính và kế toán",
+                parent_department_id: 1,
+                manager_id: 12,
+                is_active: true
+            },
+            {
+                department_id: 6,
+                department_name: "Bộ phận Đào tạo",
+                description: "Đào tạo và phát triển nhân viên",
+                parent_department_id: 2,
+                manager_id: 15,
+                is_active: true
+            },
+            {
+                department_id: 7,
+                department_name: "Bộ phận Tuyển dụng",
+                description: "Tuyển dụng và tuyển chọn nhân tài",
+                parent_department_id: 2,
+                manager_id: 22,
+                is_active: true
+            },
+            {
+                department_id: 8,
+                department_name: "Phòng Dự án",
+                description: "Quản lý và điều phối các dự án",
+                parent_department_id: 4,
+                manager_id: 25,
+                is_active: false
+            }
+        ];
+
+        let positions = [
+            {
+                position_id: 1,
+                position_name: "Giám đốc",
+                description: "Lãnh đạo và điều hành toàn bộ hoạt động của công ty",
+                level: 5,
+                is_active: true
+            },
+            {
+                position_id: 2,
+                position_name: "Phó Giám đốc",
+                description: "Hỗ trợ Giám đốc trong việc điều hành công ty",
+                level: 5,
+                is_active: true
+            },
+            {
+                position_id: 3,
+                position_name: "Trưởng phòng",
+                description: "Quản lý và điều hành phòng ban",
+                level: 4,
+                is_active: true
+            },
+            {
+                position_id: 4,
+                position_name: "Phó trưởng phòng",
+                description: "Hỗ trợ Trưởng phòng trong công việc quản lý",
+                level: 4,
+                is_active: true
+            },
+            {
+                position_id: 5,
+                position_name: "Trưởng nhóm",
+                description: "Điều phối và quản lý nhóm làm việc",
+                level: 3,
+                is_active: true
+            },
+            {
+                position_id: 6,
+                position_name: "Chuyên viên",
+                description: "Thực hiện các công việc chuyên môn",
+                level: 2,
+                is_active: true
+            },
+            {
+                position_id: 7,
+                position_name: "Kỹ sư",
+                description: "Thực hiện các công việc kỹ thuật chuyên môn",
+                level: 2,
+                is_active: true
+            },
+            {
+                position_id: 8,
+                position_name: "Nhân viên",
+                description: "Thực hiện các công việc được giao",
+                level: 1,
+                is_active: true
+            },
+            {
+                position_id: 9,
+                position_name: "Thực tập sinh",
+                description: "Học tập và thực hành công việc",
+                level: 1,
+                is_active: true
+            }
+        ];
+
+        // Enhanced user data with more details
+        const users = {
+            1: { full_name: "Nguyễn Văn An", username: "an.nguyen", email: "an.nguyen@company.com", phone: "0901234567" },
+            3: { full_name: "Trần Thị Bình", username: "binh.tran", email: "binh.tran@company.com", phone: "0902345678" },
+            5: { full_name: "Lê Minh Cường", username: "cuong.le", email: "cuong.le@company.com", phone: "0903456789" },
+            8: { full_name: "Phạm Văn Đức", username: "duc.pham", email: "duc.pham@company.com", phone: "0904567890" },
+            12: { full_name: "Hoàng Thị Em", username: "em.hoang", email: "em.hoang@company.com", phone: "0905678901" },
+            15: { full_name: "Vũ Minh Giang", username: "giang.vu", email: "giang.vu@company.com", phone: "0906789012" },
+            22: { full_name: "Đỗ Thành Hưng", username: "hung.do", email: "hung.do@company.com", phone: "0907890123" },
+            25: { full_name: "Ngô Thị Linh", username: "linh.ngo", email: "linh.ngo@company.com", phone: "0908901234" },
+            30: { full_name: "Bùi Văn Nam", username: "nam.bui", email: "nam.bui@company.com", phone: "0909012345" },
+            35: { full_name: "Đinh Thị Oanh", username: "oanh.dinh", email: "oanh.dinh@company.com", phone: "0910123456" },
+            40: { full_name: "Nguyễn Minh Phú", username: "phu.nguyen", email: "phu.nguyen@company.com", phone: "0911234567" },
+            42: { full_name: "Trần Văn Quang", username: "quang.tran", email: "quang.tran@company.com", phone: "0912345678" },
+            45: { full_name: "Lê Thị Hoa", username: "hoa.le", email: "hoa.le@company.com", phone: "0913456789" },
+            48: { full_name: "Phạm Minh Tuấn", username: "tuan.pham", email: "tuan.pham@company.com", phone: "0914567890" }
+        };
+
+        // Enhanced employee data with more realistic distribution
+        let employees = [
+            { employee_id: 1, user_id: 1, department_id: 1, position_id: 1, hire_date: "2020-01-15", contract_type: "Chính thức", is_active: true },
+            { employee_id: 2, user_id: 3, department_id: 2, position_id: 3, hire_date: "2020-02-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 3, user_id: 5, department_id: 3, position_id: 3, hire_date: "2020-03-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 4, user_id: 8, department_id: 4, position_id: 3, hire_date: "2020-04-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 5, user_id: 12, department_id: 5, position_id: 3, hire_date: "2020-05-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 6, user_id: 15, department_id: 6, position_id: 5, hire_date: "2021-01-15", contract_type: "Chính thức", is_active: true },
+            { employee_id: 7, user_id: 22, department_id: 7, position_id: 5, hire_date: "2021-02-15", contract_type: "Chính thức", is_active: true },
+            { employee_id: 8, user_id: 25, department_id: 8, position_id: 5, hire_date: "2021-03-01", contract_type: "Chính thức", is_active: false },
+            { employee_id: 9, user_id: 30, department_id: 2, position_id: 6, hire_date: "2021-06-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 10, user_id: 35, department_id: 3, position_id: 6, hire_date: "2021-07-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 11, user_id: 40, department_id: 4, position_id: 7, hire_date: "2022-01-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 12, user_id: 42, department_id: 4, position_id: 7, hire_date: "2022-02-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 13, user_id: 45, department_id: 6, position_id: 6, hire_date: "2022-03-01", contract_type: "Chính thức", is_active: true },
+            { employee_id: 14, user_id: 48, department_id: 7, position_id: 8, hire_date: "2022-04-01", contract_type: "Chính thức", is_active: true }
+        ];
+
+        // Sample project data
+        let projects = [
+            { project_id: 1, project_name: "Dự án xây dựng nhà máy A", status: "Đang thực hiện", leader_id: 8, site_id: 1 },
+            { project_id: 2, project_name: "Dự án cải tạo hệ thống an toàn", status: "Đang thực hiện", leader_id: 5, site_id: 2 },
+            { project_id: 3, project_name: "Dự án đào tạo nhân viên 2024", status: "Hoàn thành", leader_id: 15, site_id: null },
+            { project_id: 4, project_name: "Dự án nâng cấp hệ thống IT", status: "Đang thực hiện", leader_id: 8, site_id: 1 }
+        ];
+
+        // Project assignments
+        let projectAssignments = [
+            { assignment_id: 1, project_id: 1, user_id: 40, role_in_project: "Kỹ sư dự án" },
+            { assignment_id: 2, project_id: 1, user_id: 42, role_in_project: "Kỹ sư giám sát" },
+            { assignment_id: 3, project_id: 2, user_id: 35, role_in_project: "Chuyên viên an toàn" },
+            { assignment_id: 4, project_id: 3, user_id: 45, role_in_project: "Chuyên viên đào tạo" },
+            { assignment_id: 5, project_id: 4, user_id: 40, role_in_project: "Trưởng nhóm kỹ thuật" }
+        ];
+
+        // Filtered data
+        let filteredDepartments = [...departments];
+        let filteredPositions = [...positions];
+        let currentEditingDepartment = null;
+        let currentEditingPosition = null;
+
+        // Utility functions
+        function getUserName(userId) {
+            return users[userId] ? users[userId].full_name : 'Chưa chỉ định';
+        }
+
+        function getUserDetails(userId) {
+            return users[userId] || null;
+        }
+
+        function getDepartmentName(departmentId) {
+            const dept = departments.find(d => d.department_id === departmentId);
+            return dept ? dept.department_name : 'Không xác định';
+        }
+
+        function getPositionName(positionId) {
+            const pos = positions.find(p => p.position_id === positionId);
+            return pos ? pos.position_name : 'Không xác định';
+        }
+
+        function getEmployeeCountByDepartment(departmentId) {
+            return employees.filter(e => e.department_id === departmentId && e.is_active).length;
+        }
+
+        function getEmployeeCountByPosition(positionId) {
+            return employees.filter(e => e.position_id === positionId && e.is_active).length;
+        }
+
+        function getEmployeesByDepartment(departmentId) {
+            return employees.filter(e => e.department_id === departmentId && e.is_active);
+        }
+
+        function getProjectCountByDepartment(departmentId) {
+            const deptEmployees = employees.filter(e => e.department_id === departmentId && e.is_active);
+            const deptUserIds = deptEmployees.map(e => e.user_id);
+            return projects.filter(p => deptUserIds.includes(p.leader_id) && p.status === "Đang thực hiện").length;
+        }
+
+        function getDepartmentHierarchyPath(departmentId) {
+            const path = [];
+            let currentDept = departments.find(d => d.department_id === departmentId);
+            
+            while (currentDept) {
+                path.unshift(currentDept.department_name);
+                currentDept = currentDept.parent_department_id 
+                    ? departments.find(d => d.department_id === currentDept.parent_department_id)
+                    : null;
+            }
+            
+            return path.join(' > ');
+        }
+
+        function getLevelName(level) {
+            const levels = {
+                1: "Cấp 1 (Nhân viên)",
+                2: "Cấp 2 (Chuyên viên)", 
+                3: "Cấp 3 (Trưởng nhóm)",
+                4: "Cấp 4 (Trưởng phòng)",
+                5: "Cấp 5 (Giám đốc)"
+            };
+            return levels[level] || `Cấp ${level}`;
+        }
+
+        function getContractTypeBadge(contractType) {
+            const types = {
+                'Chính thức': 'success',
+                'Thử việc': 'warning',
+                'Hợp đồng': 'info',
+                'Thực tập': 'secondary'
+            };
+            return types[contractType] || 'secondary';
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            switch(tabName) {
+                case 'departments':
+                    renderDepartments();
+                    break;
+                case 'positions':
+                    renderPositions();
+                    break;
+                case 'hierarchy':
+                    renderHierarchy();
+                    break;
+                case 'analytics':
+                    renderAnalytics();
+                    break;
+            }
+        }
+
+        // Enhanced department management
+        function renderDepartments() {
+            const grid = document.getElementById('departmentsGrid');
+            grid.innerHTML = '';
+            
+            filteredDepartments.forEach(dept => {
+                const employeeCount = getEmployeeCountByDepartment(dept.department_id);
+                const projectCount = getProjectCountByDepartment(dept.department_id);
+                const managerName = getUserName(dept.manager_id);
+                const parentName = dept.parent_department_id ? getDepartmentName(dept.parent_department_id) : 'Phòng ban gốc';
+                const hierarchyPath = getDepartmentHierarchyPath(dept.department_id);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="card-subtitle">ID: ${dept.department_id}</div>
+                        <div class="card-title">${dept.department_name}</div>
+                        <div class="department-hierarchy-path">${hierarchyPath}</div>
+                        <div class="card-description">${dept.description || 'Chưa có mô tả'}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <i class="fas fa-user-crown"></i>
+                                <span>Trưởng phòng: ${managerName}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-sitemap"></i>
+                                <span>Thuộc: ${parentName}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <span>Nhân viên: ${employeeCount}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-project-diagram"></i>
+                                <span>Dự án: ${projectCount}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-circle ${dept.is_active ? 'text-success' : 'text-danger'}"></i>
+                                <span>${dept.is_active ? 'Đang hoạt động' : 'Không hoạt động'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="employee-count">
+                            <div class="count-number">${employeeCount}</div>
+                            <div class="count-label">Nhân viên hoạt động</div>
+                        </div>
+                        
+                        <div class="card-actions">
+                            <button class="btn btn-sm btn-primary" onclick="editDepartment(${dept.department_id})">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="viewDepartmentEmployees(${dept.department_id})">
+                                <i class="fas fa-users"></i> Nhân viên
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="viewDepartmentProjects(${dept.department_id})">
+                                <i class="fas fa-project-diagram"></i> Dự án
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDepartment(${dept.department_id})" 
+                                ${employeeCount > 0 ? 'disabled title="Không thể xóa phòng ban có nhân viên"' : ''}>
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterDepartments() {
+            const searchTerm = document.getElementById('departmentSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('departmentStatusFilter').value;
+            const parentFilter = document.getElementById('parentDepartmentFilter').value;
+            
+            filteredDepartments = departments.filter(dept => {
+                const matchesSearch = dept.department_name.toLowerCase().includes(searchTerm) ||
+                                    (dept.description && dept.description.toLowerCase().includes(searchTerm)) ||
+                                    getUserName(dept.manager_id).toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && dept.is_active) ||
+                    (statusFilter === 'inactive' && !dept.is_active);
+                const matchesParent = !parentFilter ||
+                    (parentFilter === 'root' && !dept.parent_department_id) ||
+                    (parentFilter === 'sub' && dept.parent_department_id);
+                
+                return matchesSearch && matchesStatus && matchesParent;
+            });
+            
+            renderDepartments();
+        }
+
+        function editDepartment(departmentId) {
+            currentEditingDepartment = departments.find(d => d.department_id === departmentId);
+            if (currentEditingDepartment) {
+                document.querySelector('#addDepartmentModal .modal-title').textContent = 'Chỉnh sửa phòng ban';
+                document.getElementById('departmentName').value = currentEditingDepartment.department_name;
+                document.getElementById('parentDepartment').value = currentEditingDepartment.parent_department_id || '';
+                document.getElementById('departmentManager').value = currentEditingDepartment.manager_id || '';
+                document.getElementById('departmentStatus').value = currentEditingDepartment.is_active.toString();
+                document.getElementById('departmentDescription').value = currentEditingDepartment.description || '';
+                openModal('addDepartmentModal');
+            }
+        }
+
+        function deleteDepartment(departmentId) {
+            if (confirm('Bạn có chắc chắn muốn xóa phòng ban này?')) {
+                // Check if department has employees
+                const hasEmployees = getEmployeeCountByDepartment(departmentId) > 0;
+                if (hasEmployees) {
+                    showNotification('Không thể xóa phòng ban này vì vẫn còn nhân viên!', 'error');
+                    return;
+                }
+                
+                // Check if department has sub-departments
+                const hasSubDepartments = departments.some(d => d.parent_department_id === departmentId);
+                if (hasSubDepartments) {
+                    showNotification('Không thể xóa phòng ban này vì vẫn còn phòng ban con!', 'error');
+                    return;
+                }
+                
+                const index = departments.findIndex(d => d.department_id === departmentId);
+                if (index > -1) {
+                    departments.splice(index, 1);
+                    filterDepartments();
+                    updateStats();
+                    showNotification('Xóa phòng ban thành công!', 'success');
+                }
+            }
+        }
+
+        function viewDepartmentEmployees(departmentId) {
+            const dept = departments.find(d => d.department_id === departmentId);
+            const deptEmployees = getEmployeesByDepartment(departmentId);
+            
+            let content = `
+                <div class="alert alert-info">
+                    <strong>${dept.department_name}</strong> - ${deptEmployees.length} nhân viên
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên nhân viên</th>
+                                <th>Vị trí</th>
+                                <th>Loại hợp đồng</th>
+                                <th>Ngày vào làm</th>
+                                <th>Liên hệ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            deptEmployees.forEach(emp => {
+                const user = getUserDetails(emp.user_id);
+                const position = getPositionName(emp.position_id);
+                const contractBadge = getContractTypeBadge(emp.contract_type);
+                
+                if (user) {
+                    content += `
+                        <tr>
+                            <td><strong>${user.full_name}</strong></td>
+                            <td><span class="level-badge">${position}</span></td>
+                            <td><span class="status-badge status-${contractBadge}">${emp.contract_type}</span></td>
+                            <td>${new Date(emp.hire_date).toLocaleDateString('vi-VN')}</td>
+                            <td>
+                                <small>${user.phone}<br>${user.email}</small>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            content += `</tbody></table></div>`;
+            
+            document.getElementById('employeeDetailsContent').innerHTML = content;
+            openModal('employeeDetailsModal');
+        }
+
+        function viewDepartmentProjects(departmentId) {
+            const dept = departments.find(d => d.department_id === departmentId);
+            const deptEmployees = employees.filter(e => e.department_id === departmentId && e.is_active);
+            const deptUserIds = deptEmployees.map(e => e.user_id);
+            const deptProjects = projects.filter(p => deptUserIds.includes(p.leader_id));
+            
+            let content = `
+                <div class="alert alert-info">
+                    <strong>${dept.department_name}</strong> - ${deptProjects.length} dự án
+                </div>
+            `;
+            
+            if (deptProjects.length > 0) {
+                content += '<div class="projects-list">';
+                deptProjects.forEach(project => {
+                    const leader = getUserName(project.leader_id);
+                    const statusClass = project.status === 'Đang thực hiện' ? 'success' : project.status === 'Hoàn thành' ? 'info' : 'warning';
+                    content += `
+                        <div class="project-item">
+                            <div>
+                                <div class="project-name">${project.project_name}</div>
+                                <small>Trưởng dự án: ${leader}</small>
+                            </div>
+                            <span class="project-status status-badge status-${statusClass}">${project.status}</span>
+                        </div>
+                    `;
+                });
+                content += '</div>';
+            } else {
+                content += '<div class="alert alert-warning">Phòng ban này chưa có dự án nào.</div>';
+            }
+            
+            document.getElementById('employeeDetailsContent').innerHTML = content;
+            openModal('employeeDetailsModal');
+        }
+
+        // Enhanced position management
+        function renderPositions() {
+            const tbody = document.getElementById('positionsTable');
+            tbody.innerHTML = '';
+            
+            filteredPositions.forEach(pos => {
+                const employeeCount = getEmployeeCountByPosition(pos.position_id);
+                const levelName = getLevelName(pos.level);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <strong>${pos.position_name}</strong>
+                        <br><small>ID: ${pos.position_id}</small>
+                    </td>
+                    <td>
+                        <span class="level-badge">${levelName}</span>
+                    </td>
+                    <td>${pos.description || 'Chưa có mô tả'}</td>
+                    <td>
+                        <strong style="color: #2ecc71;">${employeeCount}</strong>
+                        <br><small>nhân viên</small>
+                    </td>
+                    <td>
+                        <span class="status-badge ${pos.is_active ? 'status-active' : 'status-inactive'}">
+                            ${pos.is_active ? 'Đang hoạt động' : 'Không hoạt động'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editPosition(${pos.position_id})" title="Chỉnh sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-info" onclick="viewPositionEmployees(${pos.position_id})" title="Xem nhân viên">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePosition(${pos.position_id})" 
+                            ${employeeCount > 0 ? 'disabled title="Không thể xóa vị trí có nhân viên"' : 'title="Xóa vị trí"'}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterPositions() {
+            const searchTerm = document.getElementById('positionSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('positionStatusFilter').value;
+            const levelFilter = document.getElementById('levelFilter').value;
+            
+            filteredPositions = positions.filter(pos => {
+                const matchesSearch = pos.position_name.toLowerCase().includes(searchTerm) ||
+                                    (pos.description && pos.description.toLowerCase().includes(searchTerm));
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && pos.is_active) ||
+                    (statusFilter === 'inactive' && !pos.is_active);
+                const matchesLevel = !levelFilter || pos.level.toString() === levelFilter;
+                
+                return matchesSearch && matchesStatus && matchesLevel;
+            });
+            
+            renderPositions();
+        }
+
+        function editPosition(positionId) {
+            currentEditingPosition = positions.find(p => p.position_id === positionId);
+            if (currentEditingPosition) {
+                document.querySelector('#addPositionModal .modal-title').textContent = 'Chỉnh sửa vị trí';
+                document.getElementById('positionName').value = currentEditingPosition.position_name;
+                document.getElementById('positionLevel').value = currentEditingPosition.level;
+                document.getElementById('positionStatus').value = currentEditingPosition.is_active.toString();
+                document.getElementById('positionDescription').value = currentEditingPosition.description || '';
+                openModal('addPositionModal');
+            }
+        }
+
+        function deletePosition(positionId) {
+            if (confirm('Bạn có chắc chắn muốn xóa vị trí này?')) {
+                const hasEmployees = getEmployeeCountByPosition(positionId) > 0;
+                if (hasEmployees) {
+                    showNotification('Không thể xóa vị trí này vì vẫn còn nhân viên đang giữ vị trí này!', 'error');
+                    return;
+                }
+                
+                const index = positions.findIndex(p => p.position_id === positionId);
+                if (index > -1) {
+                    positions.splice(index, 1);
+                    filterPositions();
+                    updateStats();
+                    showNotification('Xóa vị trí thành công!', 'success');
+                }
+            }
+        }
+
+        function viewPositionEmployees(positionId) {
+            const position = positions.find(p => p.position_id === positionId);
+            const posEmployees = employees.filter(e => e.position_id === positionId && e.is_active);
+            
+            let content = `
+                <div class="alert alert-info">
+                    <strong>${position.position_name}</strong> - ${posEmployees.length} nhân viên
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên nhân viên</th>
+                                <th>Phòng ban</th>
+                                <th>Loại hợp đồng</th>
+                                <th>Ngày vào làm</th>
+                                <th>Liên hệ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            posEmployees.forEach(emp => {
+                const user = getUserDetails(emp.user_id);
+                const department = getDepartmentName(emp.department_id);
+                const contractBadge = getContractTypeBadge(emp.contract_type);
+                
+                if (user) {
+                    content += `
+                        <tr>
+                            <td><strong>${user.full_name}</strong></td>
+                            <td>${department}</td>
+                            <td><span class="status-badge status-${contractBadge}">${emp.contract_type}</span></td>
+                            <td>${new Date(emp.hire_date).toLocaleDateString('vi-VN')}</td>
+                            <td>
+                                <small>${user.phone}<br>${user.email}</small>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            content += `</tbody></table></div>`;
+            
+            if (posEmployees.length === 0) {
+                content += '<div class="alert alert-warning">Không có nhân viên nào ở vị trí này.</div>';
+            }
+            
+            document.getElementById('employeeDetailsContent').innerHTML = content;
+            openModal('employeeDetailsModal');
+        }
+
+        // Enhanced hierarchy management
+        function renderHierarchy() {
+            const container = document.getElementById('organizationChart');
+            const rootDepartments = departments.filter(d => !d.parent_department_id && d.is_active);
+            
+            container.innerHTML = '';
+            
+            if (rootDepartments.length === 0) {
+                container.innerHTML = '<div class="alert alert-warning">Không có phòng ban gốc nào.</div>';
+                return;
+            }
+            
+            rootDepartments.forEach(dept => {
+                renderDepartmentTree(dept, container, 0);
+            });
+        }
+
+        function renderDepartmentTree(department, container, level) {
+            const employeeCount = getEmployeeCountByDepartment(department.department_id);
+            const projectCount = getProjectCountByDepartment(department.department_id);
+            const managerName = getUserName(department.manager_id);
+            const subDepartments = departments.filter(d => d.parent_department_id === department.department_id && d.is_active);
+            
+            const treeItem = document.createElement('div');
+            treeItem.className = `tree-item ${subDepartments.length > 0 ? 'expandable' : 'leaf'}`;
+            treeItem.innerHTML = `
+                <strong>${department.department_name}</strong> 
+                (${employeeCount} nhân viên, ${projectCount} dự án) 
+                - Trưởng phòng: ${managerName}
+            `;
+            
+            if (subDepartments.length > 0) {
+                treeItem.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.classList.toggle('expanded');
+                    const nextSibling = this.nextSibling;
+                    if (nextSibling && nextSibling.classList.contains('tree-children')) {
+                        nextSibling.style.display = nextSibling.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+            }
+            
+            container.appendChild(treeItem);
+            
+            if (subDepartments.length > 0) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'tree-children';
+                childrenContainer.style.display = 'block';
+                
+                subDepartments.forEach(subDept => {
+                    renderDepartmentTree(subDept, childrenContainer, level + 1);
+                });
+                
+                container.appendChild(childrenContainer);
+            }
+        }
+
+        // Analytics rendering
+        function renderAnalytics() {
+            renderDepartmentEmployeeChart();
+            renderPositionEmployeeChart();
+            renderDetailedReport();
+        }
+
+        function renderDepartmentEmployeeChart() {
+            const container = document.getElementById('departmentEmployeeChart');
+            const activeDepartments = departments.filter(d => d.is_active);
+            
+            let chartHTML = '';
+            const maxCount = Math.max(...activeDepartments.map(d => getEmployeeCountByDepartment(d.department_id)));
+            
+            activeDepartments.forEach(dept => {
+                const count = getEmployeeCountByDepartment(dept.department_id);
+                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                
+                chartHTML += `
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="width: 100px; font-size: 0.8rem; color: #666;">${dept.department_name}</div>
+                        <div style="flex: 1; background: #f0f0f0; border-radius: 10px; margin: 0 10px; height: 20px; position: relative;">
+                            <div style="width: ${percentage}%; background: linear-gradient(90deg, #3498db, #2ecc71); height: 100%; border-radius: 10px;"></div>
+                        </div>
+                        <div style="width: 30px; text-align: right; font-weight: bold; color: #2c3e50;">${count}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = chartHTML;
+        }
+
+        function renderPositionEmployeeChart() {
+            const container = document.getElementById('positionEmployeeChart');
+            const activePositions = positions.filter(p => p.is_active);
+            
+            let chartHTML = '';
+            const maxCount = Math.max(...activePositions.map(p => getEmployeeCountByPosition(p.position_id)));
+            
+            activePositions.forEach(pos => {
+                const count = getEmployeeCountByPosition(pos.position_id);
+                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                
+                chartHTML += `
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="width: 80px; font-size: 0.8rem; color: #666;">${pos.position_name}</div>
+                        <div style="flex: 1; background: #f0f0f0; border-radius: 10px; margin: 0 10px; height: 20px; position: relative;">
+                            <div style="width: ${percentage}%; background: linear-gradient(90deg, #f39c12, #e67e22); height: 100%; border-radius: 10px;"></div>
+                        </div>
+                        <div style="width: 30px; text-align: right; font-weight: bold; color: #2c3e50;">${count}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = chartHTML;
+        }
+
+        function renderDetailedReport() {
+            const container = document.getElementById('detailedReport');
+            
+            // Calculate statistics
+            const totalDepts = departments.filter(d => d.is_active).length;
+            const totalEmp = employees.filter(e => e.is_active).length;
+            const totalProjects = projects.filter(p => p.status === 'Đang thực hiện').length;
+            
+            const avgEmpPerDept = totalDepts > 0 ? (totalEmp / totalDepts).toFixed(1) : 0;
+            
+            // Department efficiency analysis
+            const deptEfficiency = departments.filter(d => d.is_active).map(dept => {
+                const empCount = getEmployeeCountByDepartment(dept.department_id);
+                const projCount = getProjectCountByDepartment(dept.department_id);
+                return {
+                    name: dept.department_name,
+                    employees: empCount,
+                    projects: projCount,
+                    efficiency: empCount > 0 ? (projCount / empCount).toFixed(2) : 0
+                };
+            }).sort((a, b) => b.efficiency - a.efficiency);
+            
+            let reportHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="alert alert-info">
+                        <strong>Tổng quan</strong><br>
+                        ${totalDepts} phòng ban hoạt động<br>
+                        ${totalEmp} nhân viên<br>
+                        ${totalProjects} dự án đang thực hiện
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Hiệu suất</strong><br>
+                        Trung bình: ${avgEmpPerDept} nhân viên/phòng ban<br>
+                        Tỷ lệ dự án: ${totalEmp > 0 ? (totalProjects / totalEmp * 100).toFixed(1) : 0}%
+                    </div>
+                </div>
+                
+                <h4 style="color: #2c3e50; margin-bottom: 1rem;">Hiệu suất theo phòng ban</h4>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phòng ban</th>
+                                <th>Nhân viên</th>
+                                <th>Dự án</th>
+                                <th>Hiệu suất</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            deptEfficiency.forEach(dept => {
+                const efficiencyColor = dept.efficiency > 0.5 ? '#2ecc71' : dept.efficiency > 0.2 ? '#f39c12' : '#e74c3c';
+                reportHTML += `
+                    <tr>
+                        <td><strong>${dept.name}</strong></td>
+                        <td>${dept.employees}</td>
+                        <td>${dept.projects}</td>
+                        <td style="color: ${efficiencyColor}; font-weight: bold;">${dept.efficiency}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `</tbody></table></div>`;
+            
+            container.innerHTML = reportHTML;
+        }
+
+        // Modal management
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            
+            // Populate dropdowns
+            if (modalId === 'addDepartmentModal') {
+                populateParentDepartmentDropdown();
+                populateManagerDropdown();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'addDepartmentModal') {
+                currentEditingDepartment = null;
+                document.getElementById('departmentForm').reset();
+                document.querySelector('#addDepartmentModal .modal-title').textContent = 'Thêm phòng ban mới';
+            }
+            if (modalId === 'addPositionModal') {
+                currentEditingPosition = null;
+                document.getElementById('positionForm').reset();
+                document.querySelector('#addPositionModal .modal-title').textContent = 'Thêm vị trí mới';
+            }
+        }
+
+        function populateParentDepartmentDropdown() {
+            const select = document.getElementById('parentDepartment');
+            
+            select.innerHTML = '<option value="">Không có (phòng ban gốc)</option>';
+            
+            departments.filter(d => d.is_active).forEach(dept => {
+                if (!currentEditingDepartment || dept.department_id !== currentEditingDepartment.department_id) {
+                    const hierarchyPath = getDepartmentHierarchyPath(dept.department_id);
+                    select.innerHTML += `<option value="${dept.department_id}">${hierarchyPath}</option>`;
+                }
+            });
+        }
+
+        function populateManagerDropdown() {
+            const select = document.getElementById('departmentManager');
+            select.innerHTML = '<option value="">Chưa chỉ định</option>';
+            
+            Object.keys(users).forEach(userId => {
+                const employee = employees.find(e => e.user_id == userId && e.is_active);
+                if (employee) {
+                    const position = getPositionName(employee.position_id);
+                    const department = getDepartmentName(employee.department_id);
+                    select.innerHTML += `<option value="${userId}">${users[userId].full_name} - ${position} (${department})</option>`;
+                }
+            });
+        }
+
+        // Form handlers
+        document.getElementById('departmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const departmentData = {
+                department_name: document.getElementById('departmentName').value.trim(),
+                description: document.getElementById('departmentDescription').value.trim(),
+                parent_department_id: document.getElementById('parentDepartment').value || null,
+                manager_id: document.getElementById('departmentManager').value || null,
+                is_active: document.getElementById('departmentStatus').value === 'true'
+            };
+            
+            // Validation
+            if (!departmentData.department_name) {
+                showNotification('Tên phòng ban không được để trống!', 'error');
+                return;
+            }
+            
+            // Check for duplicate names
+            const existingDept = departments.find(d => 
+                d.department_name.toLowerCase() === departmentData.department_name.toLowerCase() && 
+                (!currentEditingDepartment || d.department_id !== currentEditingDepartment.department_id)
+            );
+            
+            if (existingDept) {
+                showNotification('Tên phòng ban đã tồn tại!', 'error');
+                return;
+            }
+            
+            if (currentEditingDepartment) {
+                Object.assign(currentEditingDepartment, departmentData);
+                showNotification('Cập nhật phòng ban thành công!', 'success');
+            } else {
+                const newDepartment = {
+                    department_id: Math.max(...departments.map(d => d.department_id)) + 1,
+                    ...departmentData
+                };
+                departments.push(newDepartment);
+                showNotification('Thêm phòng ban thành công!', 'success');
+            }
+            
+            filterDepartments();
+            updateStats();
+            closeModal('addDepartmentModal');
+        });
+
+        document.getElementById('positionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const positionData = {
+                position_name: document.getElementById('positionName').value.trim(),
+                description: document.getElementById('positionDescription').value.trim(),
+                level: parseInt(document.getElementById('positionLevel').value),
+                is_active: document.getElementById('positionStatus').value === 'true'
+            };
+            
+            // Validation
+            if (!positionData.position_name) {
+                showNotification('Tên vị trí không được để trống!', 'error');
+                return;
+            }
+            
+            if (!positionData.level) {
+                showNotification('Cấp bậc không được để trống!', 'error');
+                return;
+            }
+            
+            // Check for duplicate names
+            const existingPos = positions.find(p => 
+                p.position_name.toLowerCase() === positionData.position_name.toLowerCase() && 
+                (!currentEditingPosition || p.position_id !== currentEditingPosition.position_id)
+            );
+            
+            if (existingPos) {
+                showNotification('Tên vị trí đã tồn tại!', 'error');
+                return;
+            }
+            
+            if (currentEditingPosition) {
+                Object.assign(currentEditingPosition, positionData);
+                showNotification('Cập nhật vị trí thành công!', 'success');
+            } else {
+                const newPosition = {
+                    position_id: Math.max(...positions.map(p => p.position_id)) + 1,
+                    ...positionData
+                };
+                positions.push(newPosition);
+                showNotification('Thêm vị trí thành công!', 'success');
+            }
+            
+            filterPositions();
+            updateStats();
+            closeModal('addPositionModal');
+        });
+
+        // Statistics update
+        function updateStats() {
+            const activeDepartments = departments.filter(d => d.is_active).length;
+            const activePositions = positions.filter(p => p.is_active).length;
+            const activeEmployees = employees.filter(e => e.is_active).length;
+            const activeProjects = projects.filter(p => p.status === 'Đang thực hiện').length;
+            
+            document.getElementById('totalDepartments').textContent = activeDepartments;
+            document.getElementById('totalPositions').textContent = activePositions;
+            document.getElementById('totalEmployees').textContent = activeEmployees;
+            document.getElementById('totalProjects').textContent = activeProjects;
+        }
+
+        // Event listeners
+        document.getElementById('departmentSearch').addEventListener('input', filterDepartments);
+        document.getElementById('departmentStatusFilter').addEventListener('change', filterDepartments);
+        document.getElementById('parentDepartmentFilter').addEventListener('change', filterDepartments);
+
+        document.getElementById('positionSearch').addEventListener('input', filterPositions);
+        document.getElementById('positionStatusFilter').addEventListener('change', filterPositions);
+        document.getElementById('levelFilter').addEventListener('change', filterPositions);
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 3000;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                max-width: 400px;
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                    break;
+                case 'error':
+                    notification.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                    break;
+                default:
+                    notification.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Enhanced API for external integration
+        window.departmentPositionAPI = {
+            // Department operations
+            getDepartments: () => departments,
+            getActiveDepartments: () => departments.filter(d => d.is_active),
+            getDepartmentById: (id) => departments.find(d => d.department_id === id),
+            getDepartmentEmployees: (departmentId) => getEmployeesByDepartment(departmentId),
+            getDepartmentHierarchy: (departmentId) => getDepartmentHierarchyPath(departmentId),
+            
+            // Position operations
+            getPositions: () => positions,
+            getActivePositions: () => positions.filter(p => p.is_active),
+            getPositionById: (id) => positions.find(p => p.position_id === id),
+            getPositionEmployees: (positionId) => employees.filter(e => e.position_id === positionId && e.is_active),
+            
+            // Employee operations
+            getEmployees: () => employees,
+            getActiveEmployees: () => employees.filter(e => e.is_active),
+            getEmployeeById: (id) => employees.find(e => e.employee_id === id),
+            
+            // Project operations
+            getProjects: () => projects,
+            getActiveProjects: () => projects.filter(p => p.status === 'Đang thực hiện'),
+            
+            // Statistics
+            getStats: () => ({
+                totalDepartments: departments.filter(d => d.is_active).length,
+                totalPositions: positions.filter(p => p.is_active).length,
+                totalEmployees: employees.filter(e => e.is_active).length,
+                totalProjects: projects.filter(p => p.status === 'Đang thực hiện').length
+            }),
+            
+            // CRUD operations
+            addDepartment: (departmentData) => {
+                const newDepartment = {
+                    department_id: Math.max(...departments.map(d => d.department_id)) + 1,
+                    ...departmentData
+                };
+                departments.push(newDepartment);
+                filterDepartments();
+                updateStats();
+                return newDepartment;
+            },
+            
+            updateDepartment: (departmentId, departmentData) => {
+                const dept = departments.find(d => d.department_id === departmentId);
+                if (dept) {
+                    Object.assign(dept, departmentData);
+                    filterDepartments();
+                    updateStats();
+                    return dept;
+                }
+                return null;
+            },
+            
+            addPosition: (positionData) => {
+                const newPosition = {
+                    position_id: Math.max(...positions.map(p => p.position_id)) + 1,
+                    ...positionData
+                };
+                positions.push(newPosition);
+                filterPositions();
+                updateStats();
+                return newPosition;
+            },
+            
+            updatePosition: (positionId, positionData) => {
+                const pos = positions.find(p => p.position_id === positionId);
+                if (pos) {
+                    Object.assign(pos, positionData);
+                    filterPositions();
+                    updateStats();
+                    return pos;
+                }
+                return null;
+            },
+            
+            // Refresh functions
+            refresh: () => {
+                updateStats();
+                switch(document.querySelector('.tab-button.active').onclick.toString().match(/switchTab\('(.+)'\)/)[1]) {
+                    case 'departments':
+                        filterDepartments();
+                        break;
+                    case 'positions':
+                        filterPositions();
+                        break;
+                    case 'hierarchy':
+                        renderHierarchy();
+                        break;
+                    case 'analytics':
+                        renderAnalytics();
+                        break;
+                }
+            }
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderDepartments();
+            
+            // Add some sample data for demonstration
+            console.log('Department & Position Management System loaded successfully!');
+            console.log('API available at: window.departmentPositionAPI');
+        });
+
+    </script>
+</body>
+</html>

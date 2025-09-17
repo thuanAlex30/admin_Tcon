@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý dự án - SafetyPro Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3498db;
+        }
+
+        .filter-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.1);
+            border: 2px solid rgba(108, 117, 125, 0.3);
+            color: #6c757d;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .project-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            border: 2px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+            border: 2px solid rgba(243, 156, 18, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 2px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .project-body {
+            padding: 1.5rem;
+        }
+
+        .project-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-item i {
+            color: #3498db;
+            width: 16px;
+        }
+
+        .project-leader {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .leader-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .leader-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .leader-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .leader-role {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .project-progress {
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .project-team {
+            margin-bottom: 1rem;
+        }
+
+        .team-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-avatars {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .team-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: 2px solid white;
+        }
+
+        .team-count {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .project-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #666;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-project-diagram"></i> Quản lý dự án</h1>
+                <div class="breadcrumb">
+                    <a href="admin_dashboard.html">Dashboard</a> / Quản lý dự án
+                </div>
+            </div>
+            <a href="admin_dashboard.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">23</div>
+                <div class="stat-label">Tổng số dự án</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Đang thực hiện</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Đã hoàn thành</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Đang chờ</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Tìm kiếm dự án..." id="searchInput">
+                </div>
+                
+                <select class="filter-select" id="statusFilter">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang thực hiện</option>
+                    <option value="completed">Hoàn thành</option>
+                    <option value="pending">Đang chờ</option>
+                    <option value="cancelled">Đã hủy</option>
+                </select>
+                
+                <select class="filter-select" id="siteFilter">
+                    <option value="">Tất cả địa điểm</option>
+                    <option value="1">Công trường A</option>
+                    <option value="2">Công trường B</option>
+                    <option value="3">Văn phòng</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" onclick="openModal('addProjectModal')">
+                <i class="fas fa-plus"></i> Tạo dự án mới
+            </button>
+        </div>
+
+        <!-- Project Grid -->
+        <div class="project-grid" id="projectGrid">
+            <!-- Projects will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Tạo dự án mới</h2>
+                <span class="close-modal" onclick="closeModal('addProjectModal')">&times;</span>
+            </div>
+            
+            <form id="projectForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Tên dự án *</label>
+                        <input type="text" class="form-input" id="projectName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-input" id="projectStatus">
+                            <option value="pending">Đang chờ</option>
+                            <option value="active">Đang thực hiện</option>
+                            <option value="completed">Hoàn thành</option>
+                            <option value="cancelled">Đã hủy</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Ngày bắt đầu *</label>
+                        <input type="date" class="form-input" id="startDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Ngày kết thúc *</label>
+                        <input type="date" class="form-input" id="endDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trưởng dự án</label>
+                        <select class="form-input" id="leaderId" required>
+                            <option value="">Chọn trưởng dự án</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Công trường/Địa điểm</label>
+                        <select class="form-input" id="siteId" required>
+                            <option value="">Chọn địa điểm</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label class="form-label">Mô tả dự án</label>
+                        <textarea class="form-input" id="projectDescription" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Tài liệu đính kèm</label>
+                        <input type="file" class="form-input" id="projectFiles" multiple>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProjectModal')">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Tạo dự án
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        // Update the projects data structure to match database schema
+const projects = [
+    {
+        id: 1,
+        name: "Xây dựng nhà máy sản xuất",
+        description: "Dự án xây dựng nhà máy sản xuất thiết bị điện tử với quy mô lớn",
+        status: "active", 
+        start_date: "2024-01-15",
+        end_date: "2024-06-30",
+        progress: 65,
+        leader: {
+            id: 1,
+            name: "Nguyễn Văn A",
+            department: "Kỹ thuật",
+            position: "Quản lý dự án"
+        },
+        site: {
+            id: 1,
+            name: "Công trường A",
+            address: "123 Đường ABC, Quận 1"
+        },
+        team_members: [
+            {id: 2, name: "Trần B", avatar: "TB", role: "Kỹ sư"},
+            {id: 3, name: "Lê C", avatar: "LC", role: "Giám sát"},
+            // ...
+        ],
+        evidences: [
+            {id: 1, file_url: "path/to/file1.jpg", description: "Hình ảnh công trường"},
+            {id: 2, file_url: "path/to/file2.pdf", description: "Báo cáo tiến độ"}
+        ]
+    },
+    {
+        id: 2,
+        name: "Cải tạo hệ thống an toàn",
+        description: "Nâng cấp và cải tạo toàn bộ hệ thống an toàn lao động",
+        status: "completed",
+        start_date: "2023-10-01",
+        end_date: "2024-01-31",
+        progress: 100,
+        leader: {
+            id: 2,
+            name: "Trần Thị B",
+            department: "Kỹ thuật",
+            position: "Quản lý dự án"
+        },
+        site: {
+            id: 2,
+            name: "Công trường B",
+            address: "456 Đường DEF, Quận 2"
+        },
+        team_members: [
+            {id: 4, name: "Nguyễn F", avatar: "NF", role: "Kỹ sư"},
+            {id: 5, name: "Vũ G", avatar: "VG", role: "Giám sát"}
+        ],
+        evidences: [
+            {id: 3, file_url: "path/to/file3.jpg", description: "Hình ảnh công trình hoàn thành"},
+            {id: 4, file_url: "path/to/file4.pdf", description: "Báo cáo hoàn thành dự án"}
+        ]
+    },
+    {
+        id: 3,
+        name: "Đào tạo nhân viên mới",
+        description: "Chương trình đào tạo toàn diện cho 50 nhân viên mới tuyển dụng",
+        status: "pending",
+        start_date: "2024-03-01",
+        end_date: "2024-04-15",
+        progress: 0,
+        leader: {
+            id: 3,
+            name: "Lê Văn C",
+            department: "Nhân sự",
+            position: "Trưởng phòng Nhân sự"
+        },
+        site: {
+            id: 3,
+            name: "Văn phòng",
+            address: "789 Đường GHI, Quận 3"
+        },
+        team_members: [
+            {id: 6, name: "Phạm D", avatar: "PD", role: "Giảng viên"},
+            {id: 7, name: "Hoàng E", avatar: "HE", role: "Giảng viên"}
+        ],
+        evidences: []
+    }
+];
+
+        let filteredProjects = [...projects];
+
+        const statusLabels = {
+            active: 'Đang thực hiện',
+            completed: 'Hoàn thành',
+            pending: 'Đang chờ',
+            cancelled: 'Đã hủy'
+        };
+
+        function renderProjects() {
+            const projectGrid = document.getElementById('projectGrid');
+            
+            projectGrid.innerHTML = filteredProjects.map(project => `
+                <div class="project-card">
+                    <div class="project-header">
+                        <div class="project-title">${project.name}</div>
+                        <div class="project-description">${project.description}</div>
+                        <div class="project-status status-${project.status}">
+                            ${statusLabels[project.status]}
+                        </div>
+                    </div>
+                    
+                    <div class="project-body">
+                        <div class="project-info">
+                            <div class="info-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>Bắt đầu: ${formatDate(project.start_date)}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Kết thúc: ${formatDate(project.end_date)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="project-leader">
+                            <div class="leader-avatar">${project.leader.name.charAt(0)}</div>
+                            <div class="leader-info">
+                                <div class="leader-name">${project.leader.name}</div>
+                                <div class="leader-role">${project.leader.position}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="project-progress">
+                            <div class="progress-label">
+                                <span>Tiến độ</span>
+                                <span>${project.progress}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${project.progress}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="project-team">
+                            <div class="team-label">Thành viên (${project.team_members.length})</div>
+                            <div class="team-avatars">
+                                ${project.team_members.slice(0, 5).map(member => `
+                                    <div class="team-avatar" title="${member.name}">${member.avatar}</div>
+                                `).join('')}
+                                ${project.team_members.length > 5 ? 
+                                    `<div class="team-count">+${project.team_members.length - 5}</div>` : 
+                                    ''}
+                            </div>
+                        </div>
+                        
+                        <div class="project-actions">
+                            <button class="btn btn-sm btn-primary" onclick="viewProject(${project.id})">
+                                <i class="fas fa-eye"></i> Chi tiết
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="editProject(${project.id})">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button class="btn btn-sm btn-success" onclick="manageTeam(${project.id})">
+                                <i class="fas fa-users"></i> Nhóm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('vi-VN');
+        }
+
+        function filterProjects() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const siteFilter = document.getElementById('siteFilter').value;
+
+            filteredProjects = projects.filter(project => {
+                const matchesSearch = project.name.toLowerCase().includes(searchTerm) ||
+                                    project.description.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || project.status === statusFilter;
+                const matchesSite = !siteFilter || project.siteId.toString() === siteFilter;
+
+                return matchesSearch && matchesStatus && matchesSite;
+            });
+
+            renderProjects();
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterProjects);
+        document.getElementById('statusFilter').addEventListener('change', filterProjects);
+        document.getElementById('siteFilter').addEventListener('change', filterProjects);
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.getElementById('projectForm').reset();
+        }
+
+        function editProject(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                document.querySelector('.modal-title').textContent = 'Chỉnh sửa dự án';
+                document.getElementById('projectName').value = project.name;
+                document.getElementById('projectStatus').value = project.status;
+                document.getElementById('startDate').value = project.start_date;
+                document.getElementById('endDate').value = project.end_date;
+                document.getElementById('leaderId').value = project.leader.id;
+                document.getElementById('siteId').value = project.site.id;
+                document.getElementById('projectDescription').value = project.description;
+                
+                openModal('addProjectModal');
+            }
+        }
+
+        function viewProject(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                alert(`Chi tiết dự án:\n\nTên: ${project.name}\nMô tả: ${project.description}\nTrạng thái: ${statusLabels[project.status]}\nTiến độ: ${project.progress}%\nTrưởng dự án: ${project.leader.name}\nĐịa điểm: ${project.site.name}`);
+            }
+        }
+
+        function manageTeam(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                const teamList = project.team_members.map(member => member.name).join('\n');
+                alert(`Nhóm dự án "${project.name}":\n\nTrưởng dự án: ${project.leader.name}\n\nThành viên:\n${teamList}`);
+            }
+        }
+
+        // Form submission
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('projectName').value,
+                status: document.getElementById('projectStatus').value,
+                start_date: document.getElementById('startDate').value,
+                end_date: document.getElementById('endDate').value,
+                leaderId: parseInt(document.getElementById('leaderId').value) || null,
+                siteId: parseInt(document.getElementById('siteId').value) || null,
+                description: document.getElementById('projectDescription').value
+            };
+
+            // Validate dates
+            if (new Date(formData.start_date) >= new Date(formData.end_date)) {
+                alert('Ngày kết thúc phải sau ngày bắt đầu!');
+                return;
+            }
+
+            // Check if editing or adding
+            const isEditing = document.querySelector('.modal-title').textContent === 'Chỉnh sửa dự án';
+            
+            if (isEditing) {
+                // Update existing project
+                const projectIndex = projects.findIndex(p => p.name === formData.name);
+                if (projectIndex > -1) {
+                    projects[projectIndex] = {
+                        ...projects[projectIndex],
+                        ...formData,
+                        leaderName: formData.leaderId ? getLeaderName(formData.leaderId) : '',
+                        siteName: formData.siteId ? getSiteName(formData.siteId) : ''
+                    };
+                }
+            } else {
+                // Add new project
+                const newProject = {
+                    id: projects.length + 1,
+                    ...formData,
+                    progress: 0,
+                    leaderName: formData.leaderId ? getLeaderName(formData.leaderId) : '',
+                    siteName: formData.siteId ? getSiteName(formData.siteId) : '',
+                    teamMembers: []
+                };
+                
+                projects.push(newProject);
+            }
+
+            filterProjects();
+            closeModal('addProjectModal');
+            alert(isEditing ? 'Đã cập nhật dự án thành công!' : 'Đã tạo dự án mới thành công!');
+        });
+
+        function getLeaderName(leaderId) {
+            const leaders = {
+                1: 'Nguyễn Văn A',
+                2: 'Trần Thị B',
+                3: 'Lê Văn C'
+            };
+            return leaders[leaderId] || '';
+        }
+
+        function getSiteName(siteId) {
+            const sites = {
+                1: 'Công trường A',
+                2: 'Công trường B',
+                3: 'Văn phòng'
+            };
+            return sites[siteId] || '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Initialize
+        renderProjects();
+        
+        // Update stats
+        function updateStats() {
+            const totalProjects = projects.length;
+            const activeProjects = projects.filter(p => p.status === 'active').length;
+            const completedProjects = projects.filter(p => p.status === 'completed').length;
+            const pendingProjects = projects.filter(p => p.status === 'pending').length;
+            
+            document.querySelectorAll('.stat-number')[0].textContent = totalProjects;
+            document.querySelectorAll('.stat-number')[1].textContent = activeProjects;
+            document.querySelectorAll('.stat-number')[2].textContent = completedProjects;
+            document.querySelectorAll('.stat-number')[3].textContent = pendingProjects;
+        }
+        
+        updateStats();
+
+        // Add these functions to handle project data
+async function fetchProjectData() {
+    try {
+        // Replace with actual API call
+        const response = await fetch('/api/projects');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+        return [];
+    }
+}
+
+async function createProject(projectData) {
+    try {
+        const response = await fetch('/api/projects', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(projectData)
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating project:', error);
+        throw error;
+    }
+}
+
+async function updateProject(projectId, projectData) {
+    try {
+        const response = await fetch(`/api/projects/${projectId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(projectData)
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating project:', error);
+        throw error;
+    }
+}
+    </script>
+</body>
+</html>

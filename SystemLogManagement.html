@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật ký hệ thống - SafetyPro Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+        }
+
+        .tab-content {
+            padding: 2rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3498db;
+        }
+
+        .filter-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.1);
+            border: 2px solid rgba(108, 117, 125, 0.3);
+            color: #6c757d;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .data-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background: rgba(52, 152, 219, 0.05);
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            color: #555;
+        }
+
+        .log-entry {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+
+        .log-entry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .log-entry.info { border-left-color: #3498db; }
+        .log-entry.success { border-left-color: #2ecc71; }
+        .log-entry.warning { border-left-color: #f39c12; }
+        .log-entry.error { border-left-color: #e74c3c; }
+        .log-entry.critical { border-left-color: #8e44ad; }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .log-action {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .log-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .log-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .log-details {
+            background: rgba(52, 152, 219, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #2c3e50;
+            margin-top: 1rem;
+            word-break: break-all;
+        }
+
+        .severity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-info {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .severity-success {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+        }
+
+        .severity-warning {
+            background: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+        }
+
+        .severity-error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .severity-critical {
+            background: rgba(142, 68, 173, 0.1);
+            color: #8e44ad;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid #3498db;
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #666;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .pagination button:hover:not(.active) {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .log-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .log-meta {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+
+        .real-time-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #2ecc71;
+            font-size: 0.9rem;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .export-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 150px;
+        }
+
+        .export-dropdown.show {
+            display: block;
+        }
+
+        .export-dropdown button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .export-dropdown button:hover {
+            background: rgba(52, 152, 219, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-clipboard-list"></i> Nhật ký hệ thống</h1>
+                <div class="breadcrumb">
+                    <a href="admin_dashboard.html">Dashboard</a> / Nhật ký hệ thống
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div class="real-time-indicator">
+                    <div class="pulse"></div>
+                    <span>Theo dõi thời gian thực</span>
+                </div>
+                <a href="admin_dashboard.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-value" id="totalLogsCount">0</div>
+                <div class="stat-label">Tổng số log</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-value" id="errorLogsCount">0</div>
+                <div class="stat-label">Lỗi hôm nay</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value" id="activeUsersCount">0</div>
+                <div class="stat-label">Người dùng hoạt động</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="stat-value" id="notificationsCount">0</div>
+                <div class="stat-label">Thông báo mới</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="switchTab('logs')">
+                    <i class="fas fa-list-alt"></i> Nhật ký hoạt động
+                </button>
+                <button class="tab-button" onclick="switchTab('notifications')">
+                    <i class="fas fa-bell"></i> Thông báo hệ thống
+                </button>
+                <button class="tab-button" onclick="switchTab('analytics')">
+                    <i class="fas fa-chart-bar"></i> Thống kê
+                </button>
+            </div>
+
+            <!-- System Logs Tab -->
+            <div class="tab-content active" id="logs-tab">
+                <div class="controls">
+                    <div class="search-filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Tìm kiếm trong log..." id="logSearch">
+                        </div>
+                        
+                        <select class="filter-select" id="moduleFilter">
+                            <option value="">Tất cả module</option>
+                            <option value="auth">Xác thực</option>
+                            <option value="user">Người dùng</option>
+                            <option value="training">Đào tạo</option>
+                            <option value="safety">An toàn</option>
+                            <option value="ppe">PPE</option>
+                            <option value="project">Dự án</option>
+                            <option value="system">Hệ thống</option>
+                        </select>
+                        
+                        <select class="filter-select" id="severityFilter">
+                            <option value="">Tất cả mức độ</option>
+                            <option value="info">Thông tin</option>
+                            <option value="success">Thành công</option>
+                            <option value="warning">Cảnh báo</option>
+                            <option value="error">Lỗi</option>
+                            <option value="critical">Nghiêm trọng</option>
+                        </select>
+
+                        <input type="date" class="filter-select" id="dateFilter">
+                    </div>
+                    
+                    <div class="export-menu">
+                        <button class="btn btn-success" onclick="toggleExportMenu()">
+                            <i class="fas fa-download"></i> Xuất dữ liệu
+                        </button>
+                        <div class="export-dropdown" id="exportDropdown">
+                            <button onclick="exportLogs('csv')">
+                                <i class="fas fa-file-csv"></i> Xuất CSV
+                            </button>
+                            <button onclick="exportLogs('json')">
+                                <i class="fas fa-file-code"></i> Xuất JSON
+                            </button>
+                            <button onclick="exportLogs('pdf')">
+                                <i class="fas fa-file-pdf"></i> Xuất PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="logsContainer">
+                    <!-- Logs will be rendered here -->
+                </div>
+
+                <div class="pagination" id="logsPagination">
+                    <!-- Pagination will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="tab-content" id="notifications-tab">
+                <div class="controls">
+                    <div class="search-filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Tìm kiếm thông báo..." id="notificationSearch">
+                        </div>
+                        
+                        <select class="filter-select" id="notificationTypeFilter">
+                            <option value="">Tất cả loại</option>
+                            <option value="info">Thông tin</option>
+                            <option value="warning">Cảnh báo</option>
+                            <option value="error">Lỗi</option>
+                            <option value="success">Thành công</option>
+                        </select>
+                        
+                        <select class="filter-select" id="readStatusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="unread">Chưa đọc</option>
+                            <option value="read">Đã đọc</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-warning" onclick="markAllAsRead()">
+                        <i class="fas fa-check"></i> Đánh dấu tất cả đã đọc
+                    </button>
+                </div>
+
+                <div id="notificationsContainer">
+                    <!-- Notifications will be rendered here -->
+                </div>
+
+                <div class="pagination" id="notificationsPagination">
+                    <!-- Pagination will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-content" id="analytics-tab">
+                <div class="controls">
+                    <div class="search-filters">
+                        <select class="filter-select" id="analyticsTimeRange">
+                            <option value="today">Hôm nay</option>
+                            <option value="week">7 ngày qua</option>
+                            <option value="month">30 ngày qua</option>
+                            <option value="quarter">3 tháng qua</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="analyticsContainer">
+                    <!-- Analytics charts will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data based on database schema
+        let systemLogs = [
+            {
+                log_id: 1,
+                user_id: 1,
+                action: "Đăng nhập hệ thống",
+                module: "auth",
+                details: {
+                    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    session_id: "sess_123456789",
+                    login_method: "username_password"
+                },
+                ip_address: "192.168.1.100",
+                timestamp: "2024-12-17T08:30:15Z",
+                severity: "info"
+            },
+            {
+                log_id: 2,
+                user_id: 15,
+                action: "Tạo khóa học mới",
+                module: "training",
+                details: {
+                    course_id: 25,
+                    course_name: "An toàn lao động cơ bản",
+                    duration_hours: 8
+                },
+                ip_address: "192.168.1.105",
+                timestamp: "2024-12-17T09:15:22Z",
+                severity: "success"
+            },
+            {
+                log_id: 3,
+                user_id: 8,
+                action: "Cập nhật thông tin PPE",
+                module: "ppe",
+                details: {
+                    item_id: 150,
+                    item_name: "Mũ bảo hiểm ABC-123",
+                    quantity_change: -5,
+                    reason: "Cấp phát cho dự án XYZ"
+                },
+                ip_address: "192.168.1.108",
+                timestamp: "2024-12-17T10:45:33Z",
+                severity: "info"
+            },
+            {
+                log_id: 4,
+                user_id: 22,
+                action: "Báo cáo sự cố an toàn",
+                module: "safety",
+                details: {
+                    incident_id: 45,
+                    severity: "medium",
+                    location: "Công trường A - Tầng 5",
+                    injury_count: 1
+                },
+                ip_address: "192.168.1.112",
+                timestamp: "2024-12-17T11:20:18Z",
+                severity: "warning"
+            },
+            {
+                log_id: 5,
+                user_id: null,
+                action: "Lỗi kết nối cơ sở dữ liệu",
+                module: "system",
+                details: {
+                    error_code: "DB_CONNECTION_TIMEOUT",
+                    database: "safety_pro_main",
+                    retry_count: 3,
+                    error_message: "Connection timeout after 30 seconds"
+                },
+                ip_address: "127.0.0.1",
+                timestamp: "2024-12-17T11:45:55Z",
+                severity: "error"
+            },
+            {
+                log_id: 6,
+                user_id: 3,
+                action: "Xuất báo cáo doanh thu",
+                module: "system",
+                details: {
+                    report_type: "revenue_monthly",
+                    month: "2024-11",
+                    total_records: 145,
+                    file_size: "2.5MB"
+                },
+                ip_address: "192.168.1.103",
+                timestamp: "2024-12-17T12:10:30Z",
+                severity: "success"
+            },
+            {
+                log_id: 7,
+                user_id: 12,
+                action: "Thất bại xác thực 2FA",
+                module: "auth",
+                details: {
+                    username: "admin@company.com",
+                    attempt_count: 3,
+                    reason: "invalid_token",
+                    account_locked: false
+                },
+                ip_address: "203.162.15.45",
+                timestamp: "2024-12-17T13:25:12Z",
+                severity: "warning"
+            },
+            {
+                log_id: 8,
+                user_id: 5,
+                action: "Cập nhật trạng thái dự án",
+                module: "project",
+                details: {
+                    project_id: 78,
+                    project_name: "Xây dựng nhà máy Bình Dương",
+                    old_status: "in_progress",
+                    new_status: "completed",
+                    completion_rate: "100%"
+                },
+                ip_address: "192.168.1.105",
+                timestamp: "2024-12-17T14:15:45Z",
+                severity: "success"
+            }
+        ];
+
+        let notifications = [
+            {
+                notification_id: 1,
+                user_id: 1,
+                title: "Khóa học sắp hết hạn",
+                message: "Khóa học 'An toàn lao động cơ bản' của bạn sẽ hết hạn vào ngày 25/12/2024",
+                type: "warning",
+                is_read: false,
+                created_at: "2024-12-17T08:00:00Z"
+            },
+            {
+                notification_id: 2,
+                user_id: 1,
+                title: "Báo cáo tháng đã sẵn sàng",
+                message: "Báo cáo an toàn lao động tháng 12/2024 đã được tạo thành công",
+                type: "success",
+                is_read: true,
+                created_at: "2024-12-17T07:30:00Z"
+            },
+            {
+                notification_id: 3,
+                user_id: 1,
+                title: "Cập nhật hệ thống",
+                message: "Hệ thống sẽ được bảo trì từ 22:00 hôm nay đến 02:00 sáng mai",
+                type: "info",
+                is_read: false,
+                created_at: "2024-12-16T16:45:00Z"
+            },
+            {
+                notification_id: 4,
+                user_id: 1,
+                title: "PPE cần bổ sung",
+                message: "Kho PPE tại công trình A đang thiếu 15 mũ bảo hiểm, cần đặt hàng bổ sung",
+                type: "warning",
+                is_read: false,
+                created_at: "2024-12-16T14:20:00Z"
+            },
+            {
+                notification_id: 5,
+                user_id: 1,
+                title: "Sự cố an toàn mới",
+                message: "Đã có báo cáo sự cố an toàn mới tại dự án 'Xây dựng nhà máy Bình Dương'",
+                type: "error",
+                is_read: true,
+                created_at: "2024-12-16T11:30:00Z"
+            }
+        ];
+
+        // Mock user data for reference
+        const users = {
+            1: { full_name: "Nguyễn Văn Admin", username: "admin" },
+            3: { full_name: "Trần Thị Hoa", username: "hoa.tran" },
+            5: { full_name: "Lê Minh Tùng", username: "tung.le" },
+            8: { full_name: "Phạm Văn Đức", username: "duc.pham" },
+            12: { full_name: "Hoàng Thị Lan", username: "lan.hoang" },
+            15: { full_name: "Vũ Minh Khoa", username: "khoa.vu" },
+            22: { full_name: "Đỗ Thành Nam", username: "nam.do" }
+        };
+
+        // Pagination settings
+        const ITEMS_PER_PAGE = 10;
+        let currentLogPage = 1;
+        let currentNotificationPage = 1;
+        let filteredLogs = [...systemLogs];
+        let filteredNotifications = [...notifications];
+
+        // Utility functions
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function getRelativeTime(dateTimeString) {
+            const now = new Date();
+            const date = new Date(dateTimeString);
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+            return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
+        }
+
+        function getUserName(userId) {
+            return users[userId] ? users[userId].full_name : 'Hệ thống';
+        }
+
+        function getSeverityIcon(severity) {
+            const icons = {
+                info: 'fas fa-info-circle',
+                success: 'fas fa-check-circle',
+                warning: 'fas fa-exclamation-triangle',
+                error: 'fas fa-times-circle',
+                critical: 'fas fa-skull-crossbones'
+            };
+            return icons[severity] || 'fas fa-circle';
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                info: 'fas fa-info-circle',
+                success: 'fas fa-check-circle',
+                warning: 'fas fa-exclamation-triangle',
+                error: 'fas fa-times-circle'
+            };
+            const colors = {
+                info: 'linear-gradient(135deg, #3498db, #2980b9)',
+                success: 'linear-gradient(135deg, #2ecc71, #27ae60)',
+                warning: 'linear-gradient(135deg, #f39c12, #e67e22)',
+                error: 'linear-gradient(135deg, #e74c3c, #c0392b)'
+            };
+            return { icon: icons[type] || 'fas fa-bell', color: colors[type] || '#6c757d' };
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            switch(tabName) {
+                case 'logs':
+                    renderLogs();
+                    break;
+                case 'notifications':
+                    renderNotifications();
+                    break;
+                case 'analytics':
+                    renderAnalytics();
+                    break;
+            }
+        }
+
+        // System logs rendering and management
+        function renderLogs() {
+            const container = document.getElementById('logsContainer');
+            const startIndex = (currentLogPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
+            
+            container.innerHTML = '';
+            
+            paginatedLogs.forEach(log => {
+                const logElement = document.createElement('div');
+                logElement.className = `log-entry ${log.severity}`;
+                
+                const detailsJson = JSON.stringify(log.details, null, 2);
+                const userName = getUserName(log.user_id);
+                const severityIcon = getSeverityIcon(log.severity);
+                
+                logElement.innerHTML = `
+                    <div class="log-header">
+                        <div>
+                            <div class="log-action">
+                                <i class="${severityIcon}"></i>
+                                ${log.action}
+                            </div>
+                            <div class="log-meta">
+                                <span><i class="fas fa-user"></i> ${userName}</span>
+                                <span><i class="fas fa-cube"></i> ${log.module}</span>
+                                <span><i class="fas fa-network-wired"></i> ${log.ip_address}</span>
+                                <span><i class="fas fa-clock"></i> ${getRelativeTime(log.timestamp)}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="severity-badge severity-${log.severity}">
+                                ${log.severity.toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="log-details">
+                        <strong>Chi tiết:</strong><br>
+                        ${detailsJson}
+                    </div>
+                `;
+                
+                container.appendChild(logElement);
+            });
+            
+            renderLogsPagination();
+        }
+
+        function renderLogsPagination() {
+            const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
+            const pagination = document.getElementById('logsPagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            if (currentLogPage > 1) {
+                paginationHTML += `<button onclick="changePage('logs', ${currentLogPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>`;
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentLogPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else if (i === 1 || i === totalPages || (i >= currentLogPage - 2 && i <= currentLogPage + 2)) {
+                    paginationHTML += `<button onclick="changePage('logs', ${i})">${i}</button>`;
+                } else if (i === currentLogPage - 3 || i === currentLogPage + 3) {
+                    paginationHTML += `<span>...</span>`;
+                }
+            }
+            
+            // Next button
+            if (currentLogPage < totalPages) {
+                paginationHTML += `<button onclick="changePage('logs', ${currentLogPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
+            }
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(type, page) {
+            if (type === 'logs') {
+                currentLogPage = page;
+                renderLogs();
+            } else if (type === 'notifications') {
+                currentNotificationPage = page;
+                renderNotifications();
+            }
+        }
+
+        function filterLogs() {
+            const searchTerm = document.getElementById('logSearch').value.toLowerCase();
+            const moduleFilter = document.getElementById('moduleFilter').value;
+            const severityFilter = document.getElementById('severityFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            filteredLogs = systemLogs.filter(log => {
+                const matchesSearch = log.action.toLowerCase().includes(searchTerm) ||
+                                    getUserName(log.user_id).toLowerCase().includes(searchTerm) ||
+                                    JSON.stringify(log.details).toLowerCase().includes(searchTerm);
+                const matchesModule = !moduleFilter || log.module === moduleFilter;
+                const matchesSeverity = !severityFilter || log.severity === severityFilter;
+                const matchesDate = !dateFilter || 
+                    new Date(log.timestamp).toDateString() === new Date(dateFilter).toDateString();
+                
+                return matchesSearch && matchesModule && matchesSeverity && matchesDate;
+            });
+            
+            currentLogPage = 1;
+            renderLogs();
+        }
+
+        // Notifications rendering and management
+        function renderNotifications() {
+            const container = document.getElementById('notificationsContainer');
+            const startIndex = (currentNotificationPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
+            
+            container.innerHTML = '';
+            
+            paginatedNotifications.forEach(notification => {
+                const notificationElement = document.createElement('div');
+                notificationElement.className = `notification-item ${!notification.is_read ? 'unread' : ''}`;
+                
+                const iconData = getNotificationIcon(notification.type);
+                
+                notificationElement.innerHTML = `
+                    <div class="notification-icon" style="background: ${iconData.color};">
+                        <i class="${iconData.icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-time">${getRelativeTime(notification.created_at)}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        ${!notification.is_read ? 
+                            `<button class="btn btn-sm btn-primary" onclick="markAsRead(${notification.notification_id})">
+                                <i class="fas fa-check"></i>
+                            </button>` : ''}
+                        <button class="btn btn-sm btn-danger" onclick="deleteNotification(${notification.notification_id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(notificationElement);
+            });
+            
+            renderNotificationsPagination();
+        }
+
+        function renderNotificationsPagination() {
+            const totalPages = Math.ceil(filteredNotifications.length / ITEMS_PER_PAGE);
+            const pagination = document.getElementById('notificationsPagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            if (currentNotificationPage > 1) {
+                paginationHTML += `<button onclick="changePage('notifications', ${currentNotificationPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>`;
+            }
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentNotificationPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else {
+                    paginationHTML += `<button onclick="changePage('notifications', ${i})">${i}</button>`;
+                }
+            }
+            
+            if (currentNotificationPage < totalPages) {
+                paginationHTML += `<button onclick="changePage('notifications', ${currentNotificationPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
+            }
+            
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function filterNotifications() {
+            const searchTerm = document.getElementById('notificationSearch').value.toLowerCase();
+            const typeFilter = document.getElementById('notificationTypeFilter').value;
+            const readStatusFilter = document.getElementById('readStatusFilter').value;
+            
+            filteredNotifications = notifications.filter(notification => {
+                const matchesSearch = notification.title.toLowerCase().includes(searchTerm) ||
+                                    notification.message.toLowerCase().includes(searchTerm);
+                const matchesType = !typeFilter || notification.type === typeFilter;
+                const matchesReadStatus = !readStatusFilter || 
+                    (readStatusFilter === 'read' && notification.is_read) ||
+                    (readStatusFilter === 'unread' && !notification.is_read);
+                
+                return matchesSearch && matchesType && matchesReadStatus;
+            });
+            
+            currentNotificationPage = 1;
+            renderNotifications();
+        }
+
+        function markAsRead(notificationId) {
+            const notification = notifications.find(n => n.notification_id === notificationId);
+            if (notification) {
+                notification.is_read = true;
+                renderNotifications();
+                updateStats();
+                showNotification('Đánh dấu đã đọc thành công!', 'success');
+            }
+        }
+
+        function markAllAsRead() {
+            notifications.forEach(n => n.is_read = true);
+            renderNotifications();
+            updateStats();
+            showNotification('Đã đánh dấu tất cả thông báo là đã đọc!', 'success');
+        }
+
+        function deleteNotification(notificationId) {
+            if (confirm('Bạn có chắc chắn muốn xóa thông báo này?')) {
+                const index = notifications.findIndex(n => n.notification_id === notificationId);
+                if (index > -1) {
+                    notifications.splice(index, 1);
+                    filterNotifications();
+                    updateStats();
+                    showNotification('Xóa thông báo thành công!', 'success');
+                }
+            }
+        }
+
+        // Analytics rendering
+        function renderAnalytics() {
+            const timeRange = document.getElementById('analyticsTimeRange').value;
+            const analytics = calculateAnalytics(timeRange);
+            
+            document.getElementById('analyticsContainer').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-value">${analytics.totalLogs}</div>
+                        <div class="stat-label">Tổng log ${getTimeRangeLabel(timeRange)}</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-value">${analytics.uniqueUsers}</div>
+                        <div class="stat-label">Người dùng hoạt động</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-value">${analytics.errorRate.toFixed(1)}%</div>
+                        <div class="stat-label">Tỷ lệ lỗi</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <div class="stat-value">${analytics.topModule}</div>
+                        <div class="stat-label">Module hoạt động nhiều nhất</div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 2rem;">
+                    <h3 style="padding: 1rem; margin: 0; color: #2c3e50; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                        <i class="fas fa-chart-bar"></i> Thống kê theo module
+                    </h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Module</th>
+                                <th>Tổng log</th>
+                                <th>Thành công</th>
+                                <th>Cảnh báo</th>
+                                <th>Lỗi</th>
+                                <th>Tỷ lệ lỗi (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.keys(analytics.moduleStats).map(module => {
+                                const stats = analytics.moduleStats[module];
+                                const errorRate = ((stats.error + stats.critical) / stats.total * 100).toFixed(1);
+                                return `
+                                    <tr>
+                                        <td><strong>${module}</strong></td>
+                                        <td>${stats.total}</td>
+                                        <td style="color: #2ecc71;">${stats.success + stats.info}</td>
+                                        <td style="color: #f39c12;">${stats.warning}</td>
+                                        <td style="color: #e74c3c;">${stats.error + stats.critical}</td>
+                                        <td>${errorRate}%</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="data-table" style="margin-top: 2rem;">
+                    <h3 style="padding: 1rem; margin: 0; color: #2c3e50; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                        <i class="fas fa-clock"></i> Hoạt động theo giờ
+                    </h3>
+                    <div style="padding: 2rem;">
+                        ${renderHourlyChart(analytics.hourlyStats)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateAnalytics(timeRange) {
+            const now = new Date();
+            let startDate = new Date();
+            
+            switch(timeRange) {
+                case 'today':
+                    startDate.setHours(0, 0, 0, 0);
+                    break;
+                case 'week':
+                    startDate.setDate(now.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setDate(now.getDate() - 30);
+                    break;
+                case 'quarter':
+                    startDate.setDate(now.getDate() - 90);
+                    break;
+            }
+            
+            const filteredData = systemLogs.filter(log => 
+                new Date(log.timestamp) >= startDate
+            );
+            
+            const uniqueUsers = new Set(filteredData.filter(log => log.user_id).map(log => log.user_id)).size;
+            const errorLogs = filteredData.filter(log => log.severity === 'error' || log.severity === 'critical').length;
+            const errorRate = filteredData.length > 0 ? (errorLogs / filteredData.length) * 100 : 0;
+            
+            // Module statistics
+            const moduleStats = {};
+            filteredData.forEach(log => {
+                if (!moduleStats[log.module]) {
+                    moduleStats[log.module] = {
+                        total: 0,
+                        info: 0,
+                        success: 0,
+                        warning: 0,
+                        error: 0,
+                        critical: 0
+                    };
+                }
+                moduleStats[log.module].total++;
+                moduleStats[log.module][log.severity]++;
+            });
+            
+            const topModule = Object.keys(moduleStats).reduce((a, b) => 
+                moduleStats[a].total > moduleStats[b].total ? a : b
+            , Object.keys(moduleStats)[0] || 'N/A');
+            
+            // Hourly statistics
+            const hourlyStats = {};
+            for (let i = 0; i < 24; i++) {
+                hourlyStats[i] = 0;
+            }
+            filteredData.forEach(log => {
+                const hour = new Date(log.timestamp).getHours();
+                hourlyStats[hour]++;
+            });
+            
+            return {
+                totalLogs: filteredData.length,
+                uniqueUsers,
+                errorRate,
+                topModule,
+                moduleStats,
+                hourlyStats
+            };
+        }
+
+        function getTimeRangeLabel(timeRange) {
+            const labels = {
+                'today': 'hôm nay',
+                'week': '7 ngày qua',
+                'month': '30 ngày qua',
+                'quarter': '3 tháng qua'
+            };
+            return labels[timeRange];
+        }
+
+        function renderHourlyChart(hourlyStats) {
+            const maxValue = Math.max(...Object.values(hourlyStats));
+            let chartHTML = '<div style="display: flex; align-items: end; gap: 0.5rem; height: 200px;">';
+            
+            for (let hour = 0; hour < 24; hour++) {
+                const value = hourlyStats[hour];
+                const height = maxValue > 0 ? (value / maxValue) * 150 : 0;
+                
+                chartHTML += `
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                        <div style="font-size: 0.7rem; color: #666; margin-bottom: 0.25rem;">${value}</div>
+                        <div style="
+                            width: 100%;
+                            height: ${height}px;
+                            background: linear-gradient(135deg, #3498db, #2980b9);
+                            border-radius: 2px;
+                            margin-bottom: 0.25rem;
+                        "></div>
+                        <div style="font-size: 0.7rem; color: #666;">${hour}:00</div>
+                    </div>
+                `;
+            }
+            
+            chartHTML += '</div>';
+            return chartHTML;
+        }
+
+        // Export functionality
+        function toggleExportMenu() {
+            const dropdown = document.getElementById('exportDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function exportLogs(format) {
+            const dropdown = document.getElementById('exportDropdown');
+            dropdown.classList.remove('show');
+            
+            const data = filteredLogs.map(log => ({
+                timestamp: formatDateTime(log.timestamp),
+                user: getUserName(log.user_id),
+                action: log.action,
+                module: log.module,
+                severity: log.severity,
+                ip_address: log.ip_address,
+                details: JSON.stringify(log.details)
+            }));
+            
+            switch(format) {
+                case 'csv':
+                    exportToCSV(data);
+                    break;
+                case 'json':
+                    exportToJSON(data);
+                    break;
+                case 'pdf':
+                    exportToPDF(data);
+                    break;
+            }
+            
+            showNotification(`Xuất dữ liệu ${format.toUpperCase()} thành công!`, 'success');
+        }
+
+        function exportToCSV(data) {
+            const headers = ['Thời gian', 'Người dùng', 'Hành động', 'Module', 'Mức độ', 'IP', 'Chi tiết'];
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => [
+                    `"${row.timestamp}"`,
+                    `"${row.user}"`,
+                    `"${row.action}"`,
+                    `"${row.module}"`,
+                    `"${row.severity}"`,
+                    `"${row.ip_address}"`,
+                    `"${row.details.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+            
+            downloadFile(csvContent, `system_logs_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+        }
+
+        function exportToJSON(data) {
+            const jsonContent = JSON.stringify(data, null, 2);
+            downloadFile(jsonContent, `system_logs_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+        }
+
+        function exportToPDF(data) {
+            // Basic PDF export - in a real application, use a library like jsPDF
+            let pdfContent = `
+                SYSTEM LOGS REPORT
+                Generated: ${new Date().toLocaleString('vi-VN')}
+                Total Records: ${data.length}
+                
+                ================================================================
+                
+            `;
+            
+            data.forEach((log, index) => {
+                pdfContent += `
+                ${index + 1}. ${log.action}
+                Time: ${log.timestamp}
+                User: ${log.user}
+                Module: ${log.module}
+                Severity: ${log.severity}
+                IP: ${log.ip_address}
+                Details: ${log.details}
+                
+                ----------------------------------------------------------------
+                `;
+            });
+            
+            downloadFile(pdfContent, `system_logs_${new Date().toISOString().split('T')[0]}.txt`, 'text/plain');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Statistics update
+        function updateStats() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const todayLogs = systemLogs.filter(log => new Date(log.timestamp) >= today);
+            const errorLogs = todayLogs.filter(log => log.severity === 'error' || log.severity === 'critical');
+            const activeUsers = new Set(todayLogs.filter(log => log.user_id).map(log => log.user_id)).size;
+            const unreadNotifications = notifications.filter(n => !n.is_read).length;
+            
+            document.getElementById('totalLogsCount').textContent = systemLogs.length;
+            document.getElementById('errorLogsCount').textContent = errorLogs.length;
+            document.getElementById('activeUsersCount').textContent = activeUsers;
+            document.getElementById('notificationsCount').textContent = unreadNotifications;
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                color: white;
+                font-weight: 600;
+                z-index: 3000;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                    break;
+                case 'error':
+                    notification.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                    break;
+                case 'warning':
+                    notification.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                    break;
+                default:
+                    notification.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('logSearch').addEventListener('input', filterLogs);
+        document.getElementById('moduleFilter').addEventListener('change', filterLogs);
+        document.getElementById('severityFilter').addEventListener('change', filterLogs);
+        document.getElementById('dateFilter').addEventListener('change', filterLogs);
+
+        document.getElementById('notificationSearch').addEventListener('input', filterNotifications);
+        document.getElementById('notificationTypeFilter').addEventListener('change', filterNotifications);
+        document.getElementById('readStatusFilter').addEventListener('change', filterNotifications);
+
+        document.getElementById('analyticsTimeRange').addEventListener('change', renderAnalytics);
+
+        // Close export dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.export-menu')) {
+                document.getElementById('exportDropdown').classList.remove('show');
+            }
+        });
+
+        // Real-time updates simulation
+        function simulateRealTimeUpdates() {
+            // Add a new log entry every 30 seconds
+            setInterval(() => {
+                const newLog = generateRandomLog();
+                systemLogs.unshift(newLog);
+                
+                // Keep only the last 1000 logs to prevent memory issues
+                if (systemLogs.length > 1000) {
+                    systemLogs.splice(1000);
+                }
+                
+                // Update filtered logs if current filters still match
+                filterLogs();
+                updateStats();
+            }, 30000);
+            
+            // Add a new notification every 2 minutes
+            setInterval(() => {
+                const newNotification = generateRandomNotification();
+                notifications.unshift(newNotification);
+                
+                // Keep only the last 100 notifications
+                if (notifications.length > 100) {
+                    notifications.splice(100);
+                }
+                
+                filterNotifications();
+                updateStats();
+            }, 120000);
+        }
+
+        function generateRandomLog() {
+            const actions = [
+                "Đăng nhập hệ thống",
+                "Đăng xuất hệ thống",
+                "Cập nhật thông tin người dùng",
+                "Tạo dự án mới",
+                "Cập nhật trạng thái dự án",
+                "Báo cáo sự cố an toàn",
+                "Cấp phát PPE",
+                "Hoàn thành khóa học",
+                "Xuất báo cáo",
+                "Sao lưu dữ liệu"
+            ];
+            
+            const modules = ["auth", "user", "project", "safety", "ppe", "training", "system"];
+            const severities = ["info", "success", "warning", "error"];
+            const userIds = [1, 3, 5, 8, 12, 15, 22];
+            
+            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+            const randomModule = modules[Math.floor(Math.random() * modules.length)];
+            const randomSeverity = severities[Math.floor(Math.random() * severities.length)];
+            const randomUserId = userIds[Math.floor(Math.random() * userIds.length)];
+            
+            return {
+                log_id: Math.max(...systemLogs.map(l => l.log_id)) + 1,
+                user_id: randomUserId,
+                action: randomAction,
+                module: randomModule,
+                details: {
+                    generated: true,
+                    timestamp: new Date().toISOString(),
+                    random_data: Math.random().toString(36).substr(2, 9)
+                },
+                ip_address: `192.168.1.${Math.floor(Math.random() * 255)}`,
+                timestamp: new Date().toISOString(),
+                severity: randomSeverity
+            };
+        }
+
+        function generateRandomNotification() {
+            const titles = [
+                "Cập nhật hệ thống",
+                "PPE cần bổ sung",
+                "Khóa học sắp hết hạn",
+                "Sự cố an toàn mới",
+                "Báo cáo đã sẵn sàng",
+                "Dự án cần phê duyệt"
+            ];
+            
+            const messages = [
+                "Hệ thống sẽ được bảo trì vào cuối tuần này",
+                "Kho PPE đang thiếu một số vật dụng quan trọng",
+                "Một số nhân viên có chứng chỉ sắp hết hạn",
+                "Đã có báo cáo sự cố mới cần được xem xét",
+                "Báo cáo monthly đã được tạo thành công",
+                "Có dự án mới cần được phê duyệt"
+            ];
+            
+            const types = ["info", "warning", "success", "error"];
+            
+            return {
+                notification_id: Math.max(...notifications.map(n => n.notification_id)) + 1,
+                user_id: 1,
+                title: titles[Math.floor(Math.random() * titles.length)],
+                message: messages[Math.floor(Math.random() * messages.length)],
+                type: types[Math.floor(Math.random() * types.length)],
+                is_read: false,
+                created_at: new Date().toISOString()
+            };
+        }
+
+        // Advanced search functionality
+        function setupAdvancedSearch() {
+            const searchInputs = document.querySelectorAll('input[type="text"]');
+            
+            searchInputs.forEach(input => {
+                let searchTimeout;
+                
+                input.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const searchTerm = this.value.toLowerCase();
+                        
+                        // Highlight search terms
+                        if (searchTerm.length >= 2) {
+                            highlightSearchTerms(searchTerm);
+                        } else {
+                            clearHighlights();
+                        }
+                    }, 300);
+                });
+            });
+        }
+
+        function highlightSearchTerms(searchTerm) {
+            const containers = ['logsContainer', 'notificationsContainer'];
+            
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                const elements = container.querySelectorAll('.log-action, .notification-title, .notification-message');
+                
+                elements.forEach(element => {
+                    const originalText = element.textContent;
+                    const regex = new RegExp(`(${searchTerm})`, 'gi');
+                    const highlightedText = originalText.replace(regex, '<mark style="background: yellow; padding: 0 2px;">$1</mark>');
+                    
+                    if (highlightedText !== originalText) {
+                        element.innerHTML = highlightedText;
+                    }
+                });
+            });
+        }
+
+        function clearHighlights() {
+            const marks = document.querySelectorAll('mark');
+            marks.forEach(mark => {
+                const parent = mark.parentNode;
+                parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                parent.normalize();
+            });
+        }
+
+        // Keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + K for search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const activeTab = document.querySelector('.tab-content.active');
+                    const searchInput = activeTab.querySelector('input[type="text"]');
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
+                }
+                
+                // Ctrl/Cmd + E for export
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    if (document.querySelector('#logs-tab').classList.contains('active')) {
+                        toggleExportMenu();
+                    }
+                }
+                
+                // Escape to close modals/dropdowns
+                if (e.key === 'Escape') {
+                    document.getElementById('exportDropdown').classList.remove('show');
+                }
+                
+                // Numbers 1-3 to switch tabs
+                if (e.key >= '1' && e.key <= '3' && !e.ctrlKey && !e.metaKey) {
+                    const tabNames = ['logs', 'notifications', 'analytics'];
+                    const tabIndex = parseInt(e.key) - 1;
+                    if (tabNames[tabIndex]) {
+                        switchTab(tabNames[tabIndex]);
+                    }
+                }
+            });
+        }
+
+        // Performance optimization
+        function optimizePerformance() {
+            // Debounced scroll for pagination
+            let scrollTimeout;
+            window.addEventListener('scroll', function() {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const scrollPosition = window.scrollY + window.innerHeight;
+                    const documentHeight = document.documentElement.scrollHeight;
+                    
+                    // Auto-load more items when near bottom (infinite scroll)
+                    if (scrollPosition >= documentHeight - 1000) {
+                        const activeTab = document.querySelector('.tab-content.active');
+                        if (activeTab.id === 'logs-tab') {
+                            loadMoreLogs();
+                        } else if (activeTab.id === 'notifications-tab') {
+                            loadMoreNotifications();
+                        }
+                    }
+                }, 100);
+            });
+        }
+
+        function loadMoreLogs() {
+            const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
+            if (currentLogPage < totalPages) {
+                currentLogPage++;
+                renderLogs();
+            }
+        }
+
+        function loadMoreNotifications() {
+            const totalPages = Math.ceil(filteredNotifications.length / ITEMS_PER_PAGE);
+            if (currentNotificationPage < totalPages) {
+                currentNotificationPage++;
+                renderNotifications();
+            }
+        }
+
+        // Data validation and sanitization
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return '';
+            return input.replace(/<script[^>]*>.*?<\/script>/gi, '')
+                       .replace(/<[^>]*>/g, '')
+                       .trim();
+        }
+
+        function validateLogEntry(log) {
+            return log && 
+                   typeof log.action === 'string' && 
+                   typeof log.module === 'string' && 
+                   typeof log.timestamp === 'string' && 
+                   typeof log.ip_address === 'string';
+        }
+
+        // Export API for external integration
+        window.systemLogAPI = {
+            // Add new log entry
+            addLog: function(logData) {
+                if (validateLogEntry(logData)) {
+                    const newLog = {
+                        log_id: Math.max(...systemLogs.map(l => l.log_id)) + 1,
+                        timestamp: new Date().toISOString(),
+                        ...logData
+                    };
+                    systemLogs.unshift(newLog);
+                    filterLogs();
+                    updateStats();
+                    return newLog;
+                }
+                return null;
+            },
+            
+            // Add notification
+            addNotification: function(notificationData) {
+                const newNotification = {
+                    notification_id: Math.max(...notifications.map(n => n.notification_id)) + 1,
+                    created_at: new Date().toISOString(),
+                    is_read: false,
+                    ...notificationData
+                };
+                notifications.unshift(newNotification);
+                filterNotifications();
+                updateStats();
+                return newNotification;
+            },
+            
+            // Get logs by criteria
+            getLogs: function(criteria = {}) {
+                return systemLogs.filter(log => {
+                    if (criteria.module && log.module !== criteria.module) return false;
+                    if (criteria.severity && log.severity !== criteria.severity) return false;
+                    if (criteria.user_id && log.user_id !== criteria.user_id) return false;
+                    if (criteria.since && new Date(log.timestamp) < new Date(criteria.since)) return false;
+                    return true;
+                });
+            },
+            
+            // Get statistics
+            getStats: function() {
+                return calculateAnalytics('month');
+            }
+        };
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderLogs();
+            setupAdvancedSearch();
+            setupKeyboardShortcuts();
+            optimizePerformance();
+            simulateRealTimeUpdates();
+            
+            // Show welcome message
+            setTimeout(() => {
+                showNotification('Nhật ký hệ thống đã được tải thành công!', 'success');
+            }, 1000);
+            
+            // Auto-refresh stats every minute
+            setInterval(updateStats, 60000);
+        });
+
+        // Debug utilities
+        window.debugSystemLog = {
+            generateLogs: function(count = 50) {
+                for (let i = 0; i < count; i++) {
+                    systemLogs.push(generateRandomLog());
+                }
+                filterLogs();
+                updateStats();
+                console.log(`Generated ${count} random logs`);
+            },
+            
+            generateNotifications: function(count = 10) {
+                for (let i = 0; i < count; i++) {
+                    notifications.push(generateRandomNotification());
+                }
+                filterNotifications();
+                updateStats();
+                console.log(`Generated ${count} random notifications`);
+            },
+            
+            clearLogs: function() {
+                if (confirm('Are you sure you want to clear all logs?')) {
+                    systemLogs.length = 0;
+                    filterLogs();
+                    updateStats();
+                    console.log('All logs cleared');
+                }
+            },
+            
+            exportData: function() {
+                return {
+                    logs: systemLogs,
+                    notifications: notifications,
+                    timestamp: new Date().toISOString()
+                };
+            }
+        };
+
+        console.log('%cSystem Log Dashboard Loaded Successfully', 'color: #2ecc71; font-weight: bold; font-size: 14px;');
+        console.log('Available API:', Object.keys(window.systemLogAPI));
+        console.log('Debug utilities:', Object.keys(window.debugSystemLog));
+        console.log('Keyboard shortcuts: Ctrl+K (search), Ctrl+E (export), 1-3 (switch tabs)');
+    </script>
+</body>
+</html>
